@@ -1,0 +1,94 @@
+{
+  "boxes": {
+    "box_12": {
+      "weight": 12,
+      "price": 70,
+      "name": "BOX 12 KG"
+    },
+    "box_20": {
+      "weight": 20,
+      "price": 100,
+      "name": "BOX 20 KG"
+    },
+    "box_custom": {
+      "min_weight": 12,
+      "max_weight": 24,
+      "name": "BOX WŁASNY"
+    }
+  },
+  "products": {
+    "weight": [
+      {
+        "id": "marchew",
+        "name": "Marchew",
+        "price": 4,
+        "unit": "kg"
+      },
+      {
+        "id": "ziemniaki",
+        "name": "Ziemniaki",
+        "price": 3,
+        "unit": "kg"
+      },
+      {
+        "id": "seler",
+        "name": "Seler",
+        "price": 6,
+        "unit": "kg"
+      },
+      {
+        "id": "pietruszka",
+        "name": "Pietruszka",
+        "price": 8,
+        "unit": "kg"
+      },
+      {
+        "id": "burak",
+        "name": "Burak czerwony",
+        "price": 4,
+        "unit": "kg"
+      },
+      {
+        "id": "cebula",
+        "name": "Cebula (zwykła)",
+        "price": 4,
+        "unit": "kg"
+      },
+      {
+        "id": "cebula_czerwona",
+        "name": "Cebula czerwona",
+        "price": 5,
+        "unit": "kg",
+        "free_limit": 5,
+        "extra_price": 5
+      }
+    ],
+    "pieces": [
+      {
+        "id": "por",
+        "name": "Por",
+        "price": 4,
+        "unit": "szt"
+      },
+      {
+        "id": "czosnek",
+        "name": "Czosnek",
+        "price": 4,
+        "unit": "szt"
+      },
+      {
+        "id": "natka",
+        "name": "Natka pietruszki",
+        "price": 6,
+        "unit": "pęk",
+        "free_limit": 1,
+        "extra_price": 15
+      }
+    ]
+  },
+  "rules": {
+    "pieces_combined_limit": 5,
+    "pieces_extra_price": 4,
+    "pieces_extra_ids": ["por", "czosnek"]
+  }
+}

@@ -1,0 +1,41 @@
+# .gitignore dla Warzywa Sędzinko
+
+# Konfiguracja bazy danych (zawiera hasła)
+config/database.php
+
+# Logi
+*.log
+error_log
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Pliki tymczasowe
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Vendor (jeśli używasz Composer w przyszłości)
+vendor/
+
+# Node modules (jeśli dodasz build process)
+node_modules/
+
+# Backupy
+*.bak
+*.backup
