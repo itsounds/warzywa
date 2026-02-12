@@ -9,6 +9,37 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
+// Ujednolicone odpowiedzi błędów (żeby nie było gołego 500)
+$debug = isset($_GET['debug']) && $_GET['debug'] === '1';
+set_error_handler(function ($severity, $message, $file, $line) {
+    // Zamień warnings/notices na wyjątki (łatwiejsze JSON error)
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+set_exception_handler(function ($e) use ($debug) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => $debug ? ($e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine()) : 'Błąd serwera',
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+});
+register_shutdown_function(function () use ($debug) {
+    $err = error_get_last();
+    if (!$err) {
+        return;
+    }
+    $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR];
+    if (!in_array($err['type'], $fatalTypes, true)) {
+        return;
+    }
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => $debug ? ($err['message'] . ' @ ' . $err['file'] . ':' . $err['line']) : 'Błąd serwera',
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+});
+
 // Obsługa OPTIONS request (CORS preflight)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -21,8 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'error' => 'Metoda niedozwolona']);
     exit;
 }
-
-require_once __DIR__ . '/../config/database.php';
 
 try {
     // Pobierz dane z requestu
@@ -38,7 +67,7 @@ try {
     }
     
     // Wczytaj konfigurację
-    $config = getProductsConfig();
+    $config = getProductsConfigLocal();
     
     // Inicjalizacja zmiennych
     $totalWeight = 0;
@@ -125,13 +154,18 @@ try {
     
     // 1. Cebula czerwona powyżej 5 kg
     if ($cebulaCzerwonaKg > 5) {
+        $cebulaCzerwona = findProductById($config, 'cebula_czerwona');
+        if (!$cebulaCzerwona || !isset($cebulaCzerwona['extra_price']) || !isset($cebulaCzerwona['free_limit'])) {
+            throw new Exception('Brak konfiguracji dopłaty dla cebuli czerwonej');
+        }
         $overLimit = $cebulaCzerwonaKg - 5;
-        $cebulaCzerwonaExtra = $overLimit * $config['products']['weight'][6]['extra_price'];
+        $overLimit = $cebulaCzerwonaKg - floatval($cebulaCzerwona['free_limit']);
+        $cebulaCzerwonaExtra = $overLimit * floatval($cebulaCzerwona['extra_price']);
         $extraPrice += $cebulaCzerwonaExtra;
         $extras[] = [
             'name' => 'Cebula czerwona (powyżej 5 kg)',
             'quantity' => round($overLimit, 2),
-            'unit_price' => $config['products']['weight'][6]['extra_price'],
+            'unit_price' => floatval($cebulaCzerwona['extra_price']),
             'price' => round($cebulaCzerwonaExtra, 2)
         ];
     }
@@ -276,4 +310,25 @@ function determineBoxType($weight, $config) {
     }
     
     return $result;
+}
+
+/**
+ * Wczytanie konfiguracji produktów bez DB.
+ * Dzięki temu /api/calculate.php działa nawet jeśli baza nie jest jeszcze skonfigurowana.
+ */
+function getProductsConfigLocal() {
+    $configPath = __DIR__ . '/../config/products.json';
+
+    if (!file_exists($configPath)) {
+        throw new Exception('Brak pliku konfiguracyjnego products.json');
+    }
+
+    $json = file_get_contents($configPath);
+    $config = json_decode($json, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception('Błąd parsowania products.json: ' . json_last_error_msg());
+    }
+
+    return $config;
 }
