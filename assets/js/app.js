@@ -7,11 +7,41 @@ $(document).ready(function() {
     
     // Zmienne globalne
     let calculationData = null;
+
+    // Presety startowe (ekran wyboru boxa -> konfigurator.php?preset=...)
+    const PRESETS = {
+        small: {
+            marchew: 3,
+            ziemniaki: 2,
+            cebula: 2,
+            burak: 2,
+            cebula_czerwona: 1,
+            pietruszka: 1,
+            seler: 1,
+            por: 2,
+            czosnek: 2
+        },
+        big: {
+            marchew: 4,
+            ziemniaki: 4,
+            cebula: 4,
+            burak: 4,
+            cebula_czerwona: 2,
+            pietruszka: 1,
+            seler: 1,
+            por: 2,
+            czosnek: 2
+        },
+        custom: {}
+    };
     
     // Inicjalizacja
     init();
     
     function init() {
+        // Zastosuj preset na starcie (jeśli jest w URL)
+        applyPresetFromUrl();
+
         // Event listeners
         $('.input-quantity').on('input change', handleQuantityChange);
         $('.btn-quantity').on('click', handleButtonClick);
@@ -31,6 +61,30 @@ $(document).ready(function() {
         
         // Początkowe obliczenie
         calculateOrder();
+    }
+
+    function applyPresetFromUrl() {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const presetKey = (params.get('preset') || '').toLowerCase();
+            if (!presetKey || !(presetKey in PRESETS)) {
+                return;
+            }
+
+            // Wyczyść wszystkie inputy
+            $('.input-quantity').val(0);
+
+            const preset = PRESETS[presetKey] || {};
+            Object.keys(preset).forEach(function(productId) {
+                const qty = preset[productId];
+                const $input = $('.input-quantity[data-product-id="' + productId + '"]');
+                if ($input.length) {
+                    $input.val(qty);
+                }
+            });
+        } catch (e) {
+            // no-op
+        }
     }
     
     /**

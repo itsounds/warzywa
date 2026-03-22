@@ -21,59 +21,65 @@
       {
         "id": "marchew",
         "name": "Marchew",
-        "price": 4,
+        "price": 5,
         "unit": "kg"
       },
       {
         "id": "ziemniaki",
         "name": "Ziemniaki",
-        "price": 3,
+        "price": 5,
         "unit": "kg"
       },
       {
         "id": "seler",
         "name": "Seler",
-        "price": 6,
+        "price": 6.5,
         "unit": "kg"
       },
       {
         "id": "pietruszka",
         "name": "Pietruszka",
-        "price": 8,
+        "price": 9,
         "unit": "kg"
       },
       {
         "id": "burak",
         "name": "Burak czerwony",
-        "price": 4,
+        "price": 5,
         "unit": "kg"
       },
       {
         "id": "cebula",
         "name": "Cebula (zwykła)",
-        "price": 4,
+        "price": 5,
         "unit": "kg"
       },
       {
         "id": "cebula_czerwona",
         "name": "Cebula czerwona",
-        "price": 5,
+        "price": 6,
         "unit": "kg",
         "free_limit": 5,
         "extra_price": 5
+      },
+      {
+        "id": "pasternak",
+        "name": "Pasternak",
+        "price": 10,
+        "unit": "kg"
       }
     ],
     "pieces": [
       {
         "id": "por",
         "name": "Por",
-        "price": 4,
+        "price": 5,
         "unit": "szt"
       },
       {
         "id": "czosnek",
         "name": "Czosnek",
-        "price": 4,
+        "price": 5,
         "unit": "szt"
       },
       {
@@ -83,6 +89,12 @@
         "unit": "pęk",
         "free_limit": 1,
         "extra_price": 15
+      },
+      {
+        "id": "wloszczyzna",
+        "name": "Włoszczyzna",
+        "price": 10,
+        "unit": "szt"
       }
     ]
   },
