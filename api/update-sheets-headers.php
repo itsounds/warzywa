@@ -45,8 +45,8 @@ try {
         'Cena bazowa (zł)',
         'Dopłaty (zł)',
         'Cena końcowa (zł)',
-        'Produkty',
-        'Status płatności'
+        'Status płatności',
+        'Produkty'
     ];
     
     $body = new Google_Service_Sheets_ValueRange([

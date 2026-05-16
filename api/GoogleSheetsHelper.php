@@ -54,8 +54,8 @@ class GoogleSheetsHelper
             number_format($orderData['base_price'], 2, '.', ''),
             number_format($orderData['extra_price'] ?? 0, 2, '.', ''),
             number_format($orderData['final_price'], 2, '.', ''),
-            $this->formatProducts($orderData['products'] ?? []),
-            $this->getPaymentStatusLabel($orderData['payment_status'] ?? 'pending') // Status płatności
+            $this->getPaymentStatusLabel($orderData['payment_status'] ?? 'pending'), // Status płatności
+            $this->formatProducts($orderData['products'] ?? []) // Produkty na końcu
         ];
 
         // Dodaj wiersz do arkusza
@@ -101,8 +101,8 @@ class GoogleSheetsHelper
                 'Cena bazowa (zł)',
                 'Dopłaty (zł)',
                 'Cena końcowa (zł)',
-                'Produkty',
-                'Status płatności'
+                'Status płatności',
+                'Produkty'
             ];
 
             $body = new Google_Service_Sheets_ValueRange([
@@ -215,8 +215,8 @@ class GoogleSheetsHelper
             return false; // Nie znaleziono zamówienia
         }
 
-        // Zaktualizuj status w kolumnie M
-        $updateRange = 'Sheet1!M' . $rowNumber;
+        // Zaktualizuj status w kolumnie L
+        $updateRange = 'Sheet1!L' . $rowNumber;
         $body = new Google_Service_Sheets_ValueRange([
             'values' => [[$this->getPaymentStatusLabel($paymentStatus)]]
         ]);
