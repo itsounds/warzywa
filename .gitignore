@@ -3,6 +3,22 @@
 # Konfiguracja bazy danych (zawiera hasła)
 config/database.php
 
+# Google Sheets - Service Account credentials (zawiera private key)
+config/shopium-434805-c15dbf2b2a3b.json
+config/*service*.json
+config/google-token.json
+config/google-sheets.php
+
+# TPay credentials
+config/tpay.php
+
+# Composer
+composer.lock
+
+# Logi
+logs/
+*.log
+
 # Logi
 *.log
 error_log

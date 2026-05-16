@@ -1,0 +1,173 @@
+<?php
+/**
+ * Klasa pomocnicza do obsługi Google Sheets z Service Account
+ */
+
+class GoogleSheetsHelper
+{
+    private $client;
+    private $service;
+    private $spreadsheetId;
+
+    public function __construct()
+    {
+        require_once __DIR__ . '/../config/google-sheets.php';
+        
+        $this->spreadsheetId = GOOGLE_SPREADSHEET_ID;
+        
+        // Sprawdź czy plik Service Account istnieje
+        if (!file_exists(GOOGLE_SERVICE_ACCOUNT_FILE)) {
+            throw new Exception('Brak pliku Service Account: ' . GOOGLE_SERVICE_ACCOUNT_FILE);
+        }
+        
+        // Utwórz klienta Google z Service Account
+        $this->client = new Google_Client();
+        $this->client->setApplicationName('Warzywa Sędzinko - Zamówienia');
+        $this->client->setScopes(GOOGLE_SCOPES);
+        $this->client->setAuthConfig(GOOGLE_SERVICE_ACCOUNT_FILE);
+
+        // Utwórz serwis Google Sheets
+        $this->service = new Google_Service_Sheets($this->client);
+    }
+
+    /**
+     * Dodaj zamówienie do arkusza
+     */
+    public function addOrder($orderData)
+    {
+        // Przygotuj nagłówki (jeśli to pierwsze zamówienie)
+        $this->ensureHeaders();
+
+        // Sformatuj adres
+        $address = $this->formatAddress($orderData);
+
+        // Przygotuj wiersz z danymi zamówienia
+        $row = [
+            date('Y-m-d H:i:s'), // Data
+            $orderData['order_id'] ?? '',
+            $orderData['customer_name'] ?? '',
+            $orderData['customer_email'] ?? '',
+            $orderData['customer_phone'] ?? '',
+            $address, // Pełny adres
+            $orderData['box_type'] ?? '',
+            number_format($orderData['total_weight'], 2, '.', ''),
+            number_format($orderData['base_price'], 2, '.', ''),
+            number_format($orderData['extra_price'] ?? 0, 2, '.', ''),
+            number_format($orderData['final_price'], 2, '.', ''),
+            $this->formatProducts($orderData['products'] ?? [])
+        ];
+
+        // Dodaj wiersz do arkusza
+        $range = 'Sheet1!A:L'; // Kolumny A-L
+        $body = new Google_Service_Sheets_ValueRange([
+            'values' => [$row]
+        ]);
+        $params = [
+            'valueInputOption' => 'USER_ENTERED'
+        ];
+
+        $this->service->spreadsheets_values->append(
+            $this->spreadsheetId,
+            $range,
+            $body,
+            $params
+        );
+
+        return true;
+    }
+
+    /**
+     * Upewnij się, że arkusz ma nagłówki
+     */
+    private function ensureHeaders()
+    {
+        // Sprawdź czy pierwszy wiersz ma nagłówki
+        $range = 'Sheet1!A1:L1';
+        $response = $this->service->spreadsheets_values->get($this->spreadsheetId, $range);
+        $values = $response->getValues();
+
+        // Jeśli brak nagłówków, dodaj je
+        if (empty($values)) {
+            $headers = [
+                'Data zamówienia',
+                'ID zamówienia',
+                'Imię i nazwisko',
+                'Email',
+                'Telefon',
+                'Adres dostawy',
+                'Typ boxa',
+                'Waga (kg)',
+                'Cena bazowa (zł)',
+                'Dopłaty (zł)',
+                'Cena końcowa (zł)',
+                'Produkty'
+            ];
+
+            $body = new Google_Service_Sheets_ValueRange([
+                'values' => [$headers]
+            ]);
+            $params = [
+                'valueInputOption' => 'USER_ENTERED'
+            ];
+
+            $this->service->spreadsheets_values->update(
+                $this->spreadsheetId,
+                $range,
+                $body,
+                $params
+            );
+        }
+    }
+
+    /**
+     * Sformatuj adres do jednej komórki
+     */
+    private function formatAddress($orderData)
+    {
+        $parts = [];
+        
+        // Ulica i numery
+        if (!empty($orderData['customer_street'])) {
+            $street = $orderData['customer_street'];
+            if (!empty($orderData['customer_building'])) {
+                $street .= ' ' . $orderData['customer_building'];
+                if (!empty($orderData['customer_apartment'])) {
+                    $street .= '/' . $orderData['customer_apartment'];
+                }
+            }
+            $parts[] = $street;
+        }
+        
+        // Kod pocztowy i miasto
+        if (!empty($orderData['customer_postal_code']) || !empty($orderData['customer_city'])) {
+            $location = '';
+            if (!empty($orderData['customer_postal_code'])) {
+                $location = $orderData['customer_postal_code'];
+            }
+            if (!empty($orderData['customer_city'])) {
+                $location .= ($location ? ' ' : '') . $orderData['customer_city'];
+            }
+            $parts[] = $location;
+        }
+        
+        return !empty($parts) ? implode(', ', $parts) : '';
+    }
+
+    /**
+     * Sformatuj listę produktów do jednej komórki
+     */
+    private function formatProducts($products)
+    {
+        $formatted = [];
+        foreach ($products as $product) {
+            $formatted[] = sprintf(
+                '%s: %.2f %s (%.2f zł)',
+                $product['name'],
+                $product['quantity'],
+                $product['unit'],
+                $product['unit_price']
+            );
+        }
+        return implode('; ', $formatted);
+    }
+}

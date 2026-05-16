@@ -309,15 +309,43 @@ $config = json_decode(file_get_contents($configPath), true);
                     <label for="customerName">Imię i nazwisko (opcjonalne)</label>
                     <input type="text" id="customerName" class="form-input" placeholder="Jan Kowalski">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="customerEmail">Email (opcjonalne)</label>
                     <input type="email" id="customerEmail" class="form-input" placeholder="jan@example.com">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="customerPhone">Telefon (opcjonalne)</label>
                     <input type="tel" id="customerPhone" class="form-input" placeholder="+48 123 456 789">
+                </div>
+
+                <div class="form-section-title">Adres dostawy</div>
+
+                <div class="form-row">
+                    <div class="form-group form-col-8">
+                        <label for="customerStreet">Ulica</label>
+                        <input type="text" id="customerStreet" class="form-input" placeholder="ul. Kwiatowa">
+                    </div>
+                    <div class="form-group form-col-2">
+                        <label for="customerBuilding">Nr budynku</label>
+                        <input type="text" id="customerBuilding" class="form-input" placeholder="12">
+                    </div>
+                    <div class="form-group form-col-2">
+                        <label for="customerApartment">Nr lokalu</label>
+                        <input type="text" id="customerApartment" class="form-input" placeholder="3">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group form-col-4">
+                        <label for="customerPostalCode">Kod pocztowy</label>
+                        <input type="text" id="customerPostalCode" class="form-input" placeholder="00-000">
+                    </div>
+                    <div class="form-group form-col-8">
+                        <label for="customerCity">Miasto</label>
+                        <input type="text" id="customerCity" class="form-input" placeholder="Warszawa">
+                    </div>
                 </div>
 
                 <div class="form-group form-consents">
@@ -326,7 +354,7 @@ $config = json_decode(file_get_contents($configPath), true);
                         <span>Akceptuję <a href="regulamin.php" target="_blank" rel="noopener noreferrer">Regulamin</a> oraz <a href="polityka-prywatnosci.php" target="_blank" rel="noopener noreferrer">Politykę prywatności</a>.</span>
                     </label>
                 </div>
-                
+
                 <button type="submit" class="btn btn-primary btn-block">Potwierdź zamówienie</button>
             </form>
         </div>

@@ -1068,6 +1068,51 @@ body {
     border-color: var(--primary-color);
 }
 
+/* Form layout helpers */
+.form-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 1.5rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.form-row {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.form-row .form-group {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.form-col-2 {
+    flex: 0 0 20%;
+}
+
+.form-col-4 {
+    flex: 0 0 33.33%;
+}
+
+.form-col-8 {
+    flex: 0 0 66.67%;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+    }
+    
+    .form-col-2,
+    .form-col-4,
+    .form-col-8 {
+        flex: 1 1 100%;
+    }
+}
+
 /* === Success Modal === */
 .modal-success {
     text-align: center;

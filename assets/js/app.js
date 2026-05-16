@@ -340,7 +340,12 @@ $(document).ready(function() {
         const customerName = $('#customerName').val().trim();
         const customerEmail = $('#customerEmail').val().trim();
         const customerPhone = $('#customerPhone').val().trim();
-        
+        const customerStreet = $('#customerStreet').val().trim();
+        const customerBuilding = $('#customerBuilding').val().trim();
+        const customerApartment = $('#customerApartment').val().trim();
+        const customerPostalCode = $('#customerPostalCode').val().trim();
+        const customerCity = $('#customerCity').val().trim();
+
         // Przygotuj dane do wysłania
         const orderData = {
             total_weight: calculationData.total_weight,
@@ -352,7 +357,12 @@ $(document).ready(function() {
             products: calculationData.products,
             customer_name: customerName || null,
             customer_email: customerEmail || null,
-            customer_phone: customerPhone || null
+            customer_phone: customerPhone || null,
+            customer_street: customerStreet || null,
+            customer_building: customerBuilding || null,
+            customer_apartment: customerApartment || null,
+            customer_postal_code: customerPostalCode || null,
+            customer_city: customerCity || null
         };
         
         // Wyślij AJAX
@@ -365,15 +375,24 @@ $(document).ready(function() {
                 if (response.success) {
                     // Zamknij modal zamówienia
                     $('#orderModal').removeClass('show');
-                    
-                    // Pokaż modal sukcesu
-                    $('#orderNumber').text(response.order_id);
-                    $('#successModal').addClass('show');
-                    
-                    // Zresetuj konfigurator po 2 sekundach
-                    setTimeout(function() {
-                        handleReset();
-                    }, 2000);
+
+                    // Jeśli jest URL do płatności, przekieruj do TPay
+                    if (response.payment_url) {
+                        // Pokaż komunikat o przekierowaniu
+                        alert('Zamówienie #' + response.order_id + ' zostało zapisane.\nZa chwilę zostaniesz przekierowany do płatności.');
+                        
+                        // Przekieruj do TPay
+                        window.location.href = response.payment_url;
+                    } else {
+                        // Pokaż modal sukcesu (bez płatności)
+                        $('#orderNumber').text(response.order_id);
+                        $('#successModal').addClass('show');
+
+                        // Zresetuj konfigurator po 2 sekundach
+                        setTimeout(function() {
+                            handleReset();
+                        }, 2000);
+                    }
                 } else {
                     showError(response.error || 'Błąd podczas składania zamówienia');
                 }
