@@ -25,6 +25,7 @@ $testOrder = [
     'base_price' => 70.00,
     'extra_price' => 5.00,
     'final_price' => 75.00,
+    'payment_status' => 'pending',
     'products' => [
         [
             'name' => 'Marchew',

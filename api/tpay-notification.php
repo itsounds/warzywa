@@ -67,6 +67,26 @@ try {
         ':transaction_id' => $transactionId
     ]);
     
+    // Pobierz order_id dla Google Sheets
+    $stmt = $pdo->prepare("
+        SELECT id FROM orders WHERE tpay_transaction_id = :transaction_id
+    ");
+    $stmt->execute([':transaction_id' => $transactionId]);
+    $order = $stmt->fetch();
+    
+    // Zaktualizuj status w Google Sheets
+    if ($order) {
+        try {
+            require_once __DIR__ . '/../vendor/autoload.php';
+            require_once __DIR__ . '/GoogleSheetsHelper.php';
+            
+            $sheets = new GoogleSheetsHelper();
+            $sheets->updatePaymentStatus($order['id'], $paymentStatus);
+        } catch (Exception $sheetsError) {
+            error_log('Błąd aktualizacji Google Sheets: ' . $sheetsError->getMessage());
+        }
+    }
+    
     // Zwróć TRUE zgodnie z wymaganiami TPay
     echo json_encode(['result' => true]);
     http_response_code(200);

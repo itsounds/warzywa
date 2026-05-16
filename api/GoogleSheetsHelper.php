@@ -54,11 +54,12 @@ class GoogleSheetsHelper
             number_format($orderData['base_price'], 2, '.', ''),
             number_format($orderData['extra_price'] ?? 0, 2, '.', ''),
             number_format($orderData['final_price'], 2, '.', ''),
-            $this->formatProducts($orderData['products'] ?? [])
+            $this->formatProducts($orderData['products'] ?? []),
+            $this->getPaymentStatusLabel($orderData['payment_status'] ?? 'pending') // Status płatności
         ];
 
         // Dodaj wiersz do arkusza
-        $range = 'Sheet1!A:L'; // Kolumny A-L
+        $range = 'Sheet1!A:M'; // Kolumny A-M
         $body = new Google_Service_Sheets_ValueRange([
             'values' => [$row]
         ]);
@@ -82,7 +83,7 @@ class GoogleSheetsHelper
     private function ensureHeaders()
     {
         // Sprawdź czy pierwszy wiersz ma nagłówki
-        $range = 'Sheet1!A1:L1';
+        $range = 'Sheet1!A1:M1';
         $response = $this->service->spreadsheets_values->get($this->spreadsheetId, $range);
         $values = $response->getValues();
 
@@ -100,7 +101,8 @@ class GoogleSheetsHelper
                 'Cena bazowa (zł)',
                 'Dopłaty (zł)',
                 'Cena końcowa (zł)',
-                'Produkty'
+                'Produkty',
+                'Status płatności'
             ];
 
             $body = new Google_Service_Sheets_ValueRange([
@@ -169,5 +171,66 @@ class GoogleSheetsHelper
             );
         }
         return implode('; ', $formatted);
+    }
+
+    /**
+     * Zwróć czytelną etykietę statusu płatności
+     */
+    private function getPaymentStatusLabel($status)
+    {
+        $labels = [
+            'pending' => '⏳ Oczekuje na płatność',
+            'paid' => '✅ Opłacone',
+            'refunded' => '↩️ Zwrot',
+            'error' => '❌ Błąd',
+            'chargeback' => '⚠️ Chargeback'
+        ];
+        return $labels[$status] ?? $status;
+    }
+
+    /**
+     * Aktualizuj status płatności w arkuszu
+     */
+    public function updatePaymentStatus($orderId, $paymentStatus)
+    {
+        // Znajdź wiersz z tym order_id (kolumna B)
+        $range = 'Sheet1!B:B';
+        $response = $this->service->spreadsheets_values->get($this->spreadsheetId, $range);
+        $values = $response->getValues();
+
+        if (empty($values)) {
+            return false;
+        }
+
+        // Szukaj wiersza z tym ID zamówienia
+        $rowNumber = null;
+        foreach ($values as $index => $row) {
+            if (isset($row[0]) && $row[0] == $orderId) {
+                $rowNumber = $index + 1; // +1 bo indeksy w Sheets zaczynają się od 1
+                break;
+            }
+        }
+
+        if (!$rowNumber) {
+            return false; // Nie znaleziono zamówienia
+        }
+
+        // Zaktualizuj status w kolumnie M
+        $updateRange = 'Sheet1!M' . $rowNumber;
+        $body = new Google_Service_Sheets_ValueRange([
+            'values' => [[$this->getPaymentStatusLabel($paymentStatus)]]
+        ]);
+        $params = [
+            'valueInputOption' => 'USER_ENTERED'
+        ];
+
+        $this->service->spreadsheets_values->update(
+            $this->spreadsheetId,
+            $updateRange,
+            $body,
+            $params
+        );
+
+        return true;
     }
 }

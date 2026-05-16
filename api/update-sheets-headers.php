@@ -32,7 +32,7 @@ try {
     
     echo "\nAktualizuję nagłówki...\n";
     
-    // Nowe nagłówki z kolumną adresu
+    // Nowe nagłówki z kolumną statusu płatności
     $headers = [
         'Data zamówienia',
         'ID zamówienia',
@@ -45,7 +45,8 @@ try {
         'Cena bazowa (zł)',
         'Dopłaty (zł)',
         'Cena końcowa (zł)',
-        'Produkty'
+        'Produkty',
+        'Status płatności'
     ];
     
     $body = new Google_Service_Sheets_ValueRange([
@@ -58,7 +59,7 @@ try {
     
     $service->spreadsheets_values->update(
         GOOGLE_SPREADSHEET_ID,
-        'Sheet1!A1:L1',
+        'Sheet1!A1:M1',
         $body,
         $params
     );

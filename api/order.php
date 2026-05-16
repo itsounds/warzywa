@@ -149,7 +149,8 @@ try {
                 'base_price' => $data['base_price'],
                 'extra_price' => isset($data['extra_price']) ? $data['extra_price'] : 0,
                 'final_price' => $data['final_price'],
-                'products' => $data['products']
+                'products' => $data['products'],
+                'payment_status' => 'pending' // Początkowy status
             ]);
         } catch (Exception $sheetsError) {
             // Jeśli zapis do Sheets się nie powiedzie, loguj błąd ale nie przerywaj (zamówienie już w bazie)
