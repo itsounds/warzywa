@@ -32,13 +32,12 @@ try {
     $transactionId = null;
     $status = null;
     
-    // Format Open API
-    if (isset($notification['tr_id']) && !isset($notification['id'])) {
-        // Stary format TPay
+    // Format starego API (ma pole tr_id)
+    if (isset($notification['tr_id'])) {
         $transactionId = $notification['tr_id'];
         $status = ($notification['tr_status'] === 'TRUE') ? 'paid' : 'pending';
     } 
-    // Format Open API
+    // Format Open API (ma pole transactionId)
     elseif (isset($notification['transactionId'])) {
         $transactionId = $notification['transactionId'];
         $status = $notification['status'] ?? 'unknown';
