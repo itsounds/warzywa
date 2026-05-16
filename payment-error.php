@@ -34,9 +34,12 @@
             text-decoration: none;
             border-radius: 6px;
             font-weight: 600;
+            transition: all 0.3s ease;
         }
         .btn-back:hover {
-            background: var(--primary-hover);
+            background: #236b26;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
         }
     </style>
 </head>

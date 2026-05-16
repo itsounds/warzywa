@@ -34,9 +34,12 @@
             text-decoration: none;
             border-radius: 6px;
             font-weight: 600;
+            transition: all 0.3s ease;
         }
         .btn-back:hover {
-            background: var(--primary-hover);
+            background: #236b26;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
         }
     </style>
 </head>
@@ -48,11 +51,12 @@
             <?php
             $orderId = isset($_GET['order_id']) ? intval($_GET['order_id']) : null;
             if ($orderId) {
-                echo "Dziękujemy za zamówienie #" . $orderId . ".<br>";
+                echo "Dziękujemy za zamówienie #" . $orderId . ".<br><br>";
             }
             ?>
-            Twoje zamówienie zostało opłacone i jest w trakcie realizacji.<br>
-            Wkrótce otrzymasz potwierdzenie na email.
+            <strong>Twoje zamówienie zostało opłacone!</strong><br><br>
+            Gdy box zostanie nadany, zostaniesz powiadomiony na adres email<br>
+            wraz z numerem przesyłki do śledzenia.
         </p>
         <a href="index.php" class="btn-back">Wróć do strony głównej</a>
     </div>

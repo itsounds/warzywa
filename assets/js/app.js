@@ -324,7 +324,7 @@ $(document).ready(function() {
      */
     function handleOrderSubmit(e) {
         e.preventDefault();
-        
+
         if (!calculationData) {
             return;
         }
@@ -335,7 +335,7 @@ $(document).ready(function() {
             showError('Aby złożyć zamówienie, zaakceptuj Regulamin i Politykę prywatności.');
             return;
         }
-        
+
         // Pobierz dane z formularza
         const customerName = $('#customerName').val().trim();
         const customerEmail = $('#customerEmail').val().trim();
@@ -364,7 +364,12 @@ $(document).ready(function() {
             customer_postal_code: customerPostalCode || null,
             customer_city: customerCity || null
         };
-        
+
+        // Pokaż loading i zablokuj przycisk
+        const $submitBtn = $('#orderForm button[type="submit"]');
+        const originalText = $submitBtn.text();
+        $submitBtn.prop('disabled', true).text('Przetwarzanie...');
+
         // Wyślij AJAX
         $.ajax({
             url: 'api/order.php',
@@ -395,6 +400,8 @@ $(document).ready(function() {
                     }
                 } else {
                     showError(response.error || 'Błąd podczas składania zamówienia');
+                    // Odblokuj przycisk
+                    $submitBtn.prop('disabled', false).text(originalText);
                 }
             },
             error: function(xhr) {
@@ -404,6 +411,8 @@ $(document).ready(function() {
                     errorMsg = response.error || errorMsg;
                 } catch(e) {}
                 showError(errorMsg);
+                // Odblokuj przycisk
+                $submitBtn.prop('disabled', false).text(originalText);
             }
         });
     }
