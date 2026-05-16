@@ -14,13 +14,13 @@ $logData = date('Y-m-d H:i:s') . ' - ' . file_get_contents('php://input') . "\n"
 @file_put_contents($logFile, $logData, FILE_APPEND);
 
 try {
-    // Pobierz dane z POST
-    $input = file_get_contents('php://input');
-    $notification = json_decode($input, true);
+    // Pobierz dane z POST (TPay wysyła w formacie URL-encoded)
+    $notification = $_POST;
     
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        // Może być format x-www-form-urlencoded
-        $notification = $_POST;
+    // Jeśli nie ma danych w $_POST, spróbuj JSON
+    if (empty($notification)) {
+        $input = file_get_contents('php://input');
+        $notification = json_decode($input, true);
     }
     
     // Sprawdź czy są wymagane dane
@@ -28,18 +28,24 @@ try {
         throw new Exception('Brak danych w powiadomieniu');
     }
     
-    // Weryfikacja powiadomienia
-    $tpay = new TPayHelper();
-    if (!$tpay->verifyNotification($notification)) {
-        throw new Exception('Nieprawidłowe powiadomienie');
+    // TPay może wysyłać w różnych formatach - obsłuż oba
+    $transactionId = null;
+    $status = null;
+    
+    // Format Open API
+    if (isset($notification['tr_id']) && !isset($notification['id'])) {
+        // Stary format TPay
+        $transactionId = $notification['tr_id'];
+        $status = ($notification['tr_status'] === 'TRUE') ? 'paid' : 'pending';
+    } 
+    // Format Open API
+    elseif (isset($notification['transactionId'])) {
+        $transactionId = $notification['transactionId'];
+        $status = $notification['status'] ?? 'unknown';
     }
     
-    // Pobierz dane z powiadomienia
-    $transactionId = $notification['tr_id'] ?? null;
-    $status = $notification['tr_status'] ?? null;
-    
     if (!$transactionId) {
-        throw new Exception('Brak transaction ID');
+        throw new Exception('Brak transaction ID w powiadomieniu');
     }
     
     // Mapowanie statusów TPay
@@ -47,6 +53,7 @@ try {
         'pending' => 'pending',
         'correct' => 'paid',
         'paid' => 'paid',
+        'TRUE' => 'paid',
         'refund' => 'refunded',
         'chargeback' => 'chargeback',
         'error' => 'error'
@@ -56,10 +63,13 @@ try {
     
     // Aktualizuj status zamówienia w bazie
     $pdo = getDBConnection();
+    
+    // Szukaj po tpay_transaction_id lub tpay_title (stary format używa tr_id)
     $stmt = $pdo->prepare("
         UPDATE orders 
         SET payment_status = :payment_status 
-        WHERE tpay_transaction_id = :transaction_id
+        WHERE tpay_transaction_id = :transaction_id 
+           OR tpay_title = :transaction_id
     ");
     
     $stmt->execute([
@@ -69,7 +79,9 @@ try {
     
     // Pobierz order_id dla Google Sheets
     $stmt = $pdo->prepare("
-        SELECT id FROM orders WHERE tpay_transaction_id = :transaction_id
+        SELECT id FROM orders 
+        WHERE tpay_transaction_id = :transaction_id 
+           OR tpay_title = :transaction_id
     ");
     $stmt->execute([':transaction_id' => $transactionId]);
     $order = $stmt->fetch();
