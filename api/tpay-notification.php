@@ -67,22 +67,26 @@ try {
     $stmt = $pdo->prepare("
         UPDATE orders 
         SET payment_status = :payment_status 
-        WHERE tpay_transaction_id = :transaction_id 
-           OR tpay_title = :transaction_id
+        WHERE tpay_transaction_id = :transaction_id1 
+           OR tpay_title = :transaction_id2
     ");
     
     $stmt->execute([
         ':payment_status' => $paymentStatus,
-        ':transaction_id' => $transactionId
+        ':transaction_id1' => $transactionId,
+        ':transaction_id2' => $transactionId
     ]);
     
     // Pobierz order_id dla Google Sheets
     $stmt = $pdo->prepare("
         SELECT id FROM orders 
-        WHERE tpay_transaction_id = :transaction_id 
-           OR tpay_title = :transaction_id
+        WHERE tpay_transaction_id = :transaction_id1 
+           OR tpay_title = :transaction_id2
     ");
-    $stmt->execute([':transaction_id' => $transactionId]);
+    $stmt->execute([
+        ':transaction_id1' => $transactionId,
+        ':transaction_id2' => $transactionId
+    ]);
     $order = $stmt->fetch();
     
     // Zaktualizuj status w Google Sheets
